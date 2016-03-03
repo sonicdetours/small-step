@@ -30,7 +30,13 @@ class PerformanceMode < Mode
     { "scale" => @scale_name, "root" => @root_note, "channel" => @channel }
   end    
 
-  def next_pulse(i)
+  def clock_started
+  end
+
+  def clock_stopped
+  end
+
+  def clock_pulse(i)
     if (active?)
       relative_pulse = i % 768
       lit_steps = relative_pulse / 96

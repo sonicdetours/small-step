@@ -70,7 +70,13 @@ class DrumEditMode < Mode
     draw_grid_pads
   end
 
-  def next_pulse(i)
+  def clock_started
+  end
+
+  def clock_stopped
+  end
+
+  def clock_pulse(i)
     if (active?)
       if (@current_step != selected_part.current_step)
         color = (selected_part.steps[@current_step] ? Color::GREEN : Color::YELLOW)

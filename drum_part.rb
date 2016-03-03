@@ -5,6 +5,8 @@ class DrumPart
   attr_accessor :current_pulse
   attr_accessor :channel
   attr_accessor :note
+  attr_accessor :volume
+  attr_accessor :pan
 
   def initialize(midi_output)
     @steps = Array.new(64) { false }
@@ -57,7 +59,7 @@ class DrumPart
   end
 
   def next_pulse(i)
-    @current_pulse == i % 384
+    @current_pulse = i % 384
 
     if (@note_on)
       @midi_output.puts(0b10000000 + @channel, @note, 100)

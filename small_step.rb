@@ -1,5 +1,6 @@
 require_relative 'constants'
 require_relative 'internal_clock'
+require_relative 'external_clock'
 require_relative 'sequencer'
 require_relative 'launch_pad'
 require_relative 'launch_control'
@@ -11,10 +12,10 @@ require 'unimidi'
 
 class SmallStep
 
-  def initialize(midi_output_port_name)
+  def initialize(clock, midi_output_port_name)
+    @clock = clock
+
     @midi_output = UniMIDI::Output.find { |device| device.name.match(midi_output_port_name) } 
-    
-    @clock = InternalClock.new
 
     @sequencer = Sequencer.new(@clock, @midi_output)    
     
@@ -39,7 +40,15 @@ class SmallStep
     load_song
   end
 
-  def next_pulse(i)
+  def clock_started
+    @launch_pad.set_letter_pad(LaunchPad::PAD_H, Color::GREEN_FLASH)
+  end
+
+  def clock_stopped
+    @launch_pad.set_letter_pad(LaunchPad::PAD_H, Color::RED)
+  end
+
+  def clock_pulse(i)
     if (i % 24 == 0)
       @launch_pad.flash_on
       @launch_control.flash_on
@@ -98,10 +107,8 @@ class SmallStep
         save_song
       when LaunchPad::PAD_H
         if @clock.running?
-          @launch_pad.set_letter_pad(LaunchPad::PAD_H, Color::RED)
           @clock.stop
         else
-          @launch_pad.set_letter_pad(LaunchPad::PAD_H, Color::GREEN_FLASH)
           @clock.start
         end
     end
@@ -127,4 +134,9 @@ class SmallStep
   end
 end
 
-SmallStep.new("XMidi").run
+clock = InternalClock.new(115)
+clock.register_clock_output("IAC")
+clock.register_clock_output("XMidi")
+
+smallstep = SmallStep.new(clock, "XMidi")
+smallstep.run

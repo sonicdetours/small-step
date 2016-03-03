@@ -8,10 +8,17 @@ class InternalClock
     @bpm = bpm
     @pulse_length = 60.0 / bpm / 24.0
     @observers = Array.new
+
+    @clock_outputs = Array.new
   end
 
-  def running?
-    @running
+  def register_clock_output(midi_port_name)
+    @clock_outputs << UniMIDI::Output.find { |device| device.name.match(midi_port_name) }
+  end
+
+  def send_clock_message(message)
+    @clock_outputs.each { |output| output.puts(message)
+}
   end
 
   def register_observer(observer)
@@ -36,12 +43,22 @@ class InternalClock
       @thread = Thread.new() { run }
       @thread.abort_on_exception = true
       @thread.priority = @thread_priority
+
+      @observers.each do |observer| 
+        observer.clock_started
+      end
+      send_clock_message(250)
     end
   end
 
   def stop
     Thread.kill(@thread)
     @thread = nil
+
+    @observers.each do |observer| 
+      observer.clock_stopped
+    end
+    send_clock_message(252)
   end
 
   def run
@@ -49,8 +66,11 @@ class InternalClock
       loop_time = Time::now + @pulse_length
 
       @observers.each do |observer| 
-        observer.next_pulse(@pulse_count)
+        observer.clock_pulse(@pulse_count)
       end
+
+      send_clock_message(248)
+
       @pulse_count = @pulse_count + 1
 
       sleep(loop_time - Time::now)

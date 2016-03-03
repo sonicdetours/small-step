@@ -10,19 +10,23 @@ class Sequencer
     @drum_parts = Array.new(8) do |i|
       part = DrumPart.new(midi_output)
       part.channel = i
+      part.note = 0,
+      part.volume = 127,
+      part.pan = 63
       part
     end
-    reset
   end
 
-  def next_pulse(i)
+  def clock_started
+    @drum_parts.each { |part| part.reset }
+  end
+
+  def clock_stopped
+  end
+
+  def clock_pulse(i)
     @drum_parts.each { |part| part.next_pulse(i) }
     @current_pulse = i
-  end
-
-  def reset
-    @current_pulse = 0
-    @drum_parts.each { |part| part.reset }
   end
 
   def deserialize(pattern)
