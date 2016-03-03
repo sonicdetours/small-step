@@ -125,5 +125,6 @@ class SmallStep
       sleep(1)
     end
   end
-
 end
+
+SmallStep.new("XMidi").run
