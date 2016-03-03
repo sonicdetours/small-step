@@ -12,12 +12,13 @@ require 'unimidi'
 
 class SmallStep
 
-  def initialize(clock, midi_output_port_name)
+  def initialize(clock, sequencer_output_port_name, performance_output_port_name)
     @clock = clock
 
-    @midi_output = UniMIDI::Output.find { |device| device.name.match(midi_output_port_name) } 
+    @sequencer_output = UniMIDI::Output.find { |device| device.name.match(sequencer_output_port_name) } 
+    @performance_output = UniMIDI::Output.find { |device| device.name.match(performance_output_port_name) } 
 
-    @sequencer = Sequencer.new(@clock, @midi_output)    
+    @sequencer = Sequencer.new(@clock, @sequencer_output)    
     
     @launch_pad = LaunchPad.new
     @launch_pad.start
@@ -26,7 +27,7 @@ class SmallStep
     @launch_control.start    
 
     @drum_edit_mode = DrumEditMode.new(@clock, @sequencer, @launch_pad, @launch_control)
-    @performance_mode = PerformanceMode.new(@clock, @launch_pad, @midi_output)
+    @performance_mode = PerformanceMode.new(@clock, @launch_pad, @performance_output)
 
     @launch_pad.register_letter_pad_observer(self)
     @launch_control.register_knob_observer(self)    
@@ -136,7 +137,7 @@ end
 
 clock = InternalClock.new(115)
 clock.register_clock_output("IAC")
-clock.register_clock_output("XMidi")
+clock.register_clock_output("Scarlett")
 
-smallstep = SmallStep.new(clock, "XMidi")
+smallstep = SmallStep.new(clock, "Scarlet", "IAC")
 smallstep.run
