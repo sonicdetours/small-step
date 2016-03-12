@@ -1,2 +1,2 @@
-# small-step
-Command line sequencer for the Novation Launch series written in Ruby
+# Small Step
+A command line sequencer for the Novation Launch series controllers written in Ruby
